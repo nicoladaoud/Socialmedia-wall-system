@@ -1,2 +1,2 @@
 # Socialmedia-wall-system
-A system to arrange social media posts for digital signage. This code rearranges the posts in a way that no posts will be cutoff screen.
+A system the works with instagram api to display posts for digital signage. This system makes sure no posts will be cutoff from the signage device. Change the variable (maxHeight) in the document to fit you signage height. This system adapts to any width. Make sure you supply correct access tokens and other related info for it to work with your account. This file can easily be altered to work with other social media (facebook, twitter, etc).
