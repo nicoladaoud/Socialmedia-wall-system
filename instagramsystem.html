@@ -1,0 +1,1610 @@
+<!--
+overview of how this code works:
+there are 2 main arrays: one includes link to the images, it is called "imagearrayfinal". The other array is for the captions that go with the images, it is called "pfinal".
+Each caption corresponds to the image index + 1. for example, imagearrayfinal[0] corresponds to pfinal[1]. notice that the index for the captions always coreespond to image index + 1.
+
+After I have the iamges and the data needed, I append them to document. the document is structued using contatiners, and each containers contains a max of 2 posts. The layout of it similar to the diagram below:
+
+post1    post3     post5   post7     post9
+post2    post4     post6   pos8      logo
+
+The script first appends each post to the corresponding container. if none of the posts exceed the screen size (if the 2 posts above each other can fit in the screen easily), then nothing changes.
+However, if both posts exceed screen size, then there are many operations that happen: the post in the bottom gets removed and appended to the column next to it. the last column in the screen gets removed
+to make up for the extra space. This process happens as many times as needed until there are no posts that exceed the screen height.
+After that, I take some of the posts I removed and see if there is any extra space that I can insert them in. Here is an example below that shows an example of how this porcess works:
+
+post1    post3     post5   post7     post9
+post2    post4     post6   pos8      logo
+
+lets say container 1 (post1 + post2) height exceeds the screen size. post 2 gets removed and inserted into the column next to it as shown below:
+
+post1  post2   post3     post5   post7     *notice that the last column got deleted to make up for the space necessary. this process gets repeated many times.
+               post4     post6   post8      
+
+After that, I try to see if any of the removed posts can fit into the document. lets say that "post9" is a small post. "post9" gets inserted under post1. an example shown below:
+
+
+post1  post2   post3     post5   post7     *notice that post 9 was inserted under psot one
+post9          post4     post6   post8
+
+
+
+the final step of the process is removing the very last element in the bottom right corner (post8 in the bottom right corner). the reason for this is that the bottom right corner is reserved for the distrcit logo,
+and nothing can take its place. The final diagram loks like this:
+
+post1  post2   post3     post5   post7   
+post9          post4     post6   logo
+
+
+-->
+<!DOCTYPE html>
+<html>
+<head>
+	 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+<body>
+	
+	
+	<script>
+
+
+//the images will be inserted into imagearrayfinal
+//the caption will be inserted into pfinal. Note that the index of each image must match the caption + 1. for example, the iamge at imagearrayfinal[0] corresponds with the caption at pfinal[1]
+
+    var token = 'your instagram token here', 
+    userid = self, // User ID - get it in source HTML of your Instagram profile 
+    num_photos = 10; // how many photos do you want to get. //supports 10 max
+ var imagearrayfinal = [];
+ var pfinal = [null];
+$.ajax({
+	url: 'https://api.instagram.com/v1/users/self/media/recent', // or /users/self/media/recent for Sandbox
+	dataType: 'jsonp',
+	type: 'GET',
+	data: {access_token: token, count: num_photos},
+	success: function(data){
+
+
+		var images = [];
+	      
+        for (x = 0; x < num_photos; x++){
+		
+	
+			
+	
+images[x] = data.data[x].images.low_resolution.url;
+imagearrayfinal[x] =  data.data[x].images.low_resolution.url;
+			}
+
+
+			
+		for( x in data.data ){
+console.log(data.data[x]);
+			
+			if (data.data[x].caption !== null){
+pfinal.push(data.data[x].caption.text);
+			}
+			
+		else {
+			pfinal.push(" ");
+		}
+
+		}
+
+
+let tr = true;//leave this here and ignore it
+ if (tr == true) {//leave this here and ignore it
+	
+for (x = 1; x < 10; x++){//start the for loop at 1
+
+
+	//the code below inserts the data into the document
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[x - 1]+'">' + "<br>" + pfinal[x] + "</td>" ;
+
+var alternatetblRow =  "<td id=\"alternatesadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[x - 1]+'">' + "<br>" + pfinal[x] + "</td>" ;
+
+
+if (x== 1){
+			$(tblRow).appendTo("#tandem tbody");
+		//$(alternatetblRow).appendTo("#alternatetandem tbody");
+}
+		else if (x== 2){
+			$(tblRow).appendTo("#tandemtwo tbody");
+		
+		//$(alternatetblRow).appendTo("#alternatetandemtwo tbody");
+}
+		else if (x== 3){
+			$(tblRow).appendTo("#tandemthree tbody");
+		
+		//$(alternatetblRow).appendTo("#alternatetandemthree tbody");
+}
+		else if (x== 4){
+			$(tblRow).appendTo("#tandemfour tbody");
+		
+		//$(alternatetblRow).appendTo("#alternatetandemfour tbody");
+}
+		else if (x== 5){
+			$(tblRow).appendTo("#tandemfive tbody");
+		
+		//$(alternatetblRow).appendTo("#alternatetandemfive tbody");
+}
+		else if (x== 6){
+			$(tblRow).appendTo("#tandemsix tbody");
+		
+		//$(alternatetblRow).appendTo("#alternatetandemsix tbody");
+}
+		else if (x== 7){
+			$(tblRow).appendTo("#tandemseven tbody");
+		
+		//$(alternatetblRow).appendTo("#alternatetandemseven tbody");
+}
+		else if (x== 8){
+			$(tblRow).appendTo("#tandemeight tbody");
+		
+		//$(alternatetblRow).appendTo("#alternatetandemeight tbody");
+}
+		else if (x== 9){
+			$(tblRow).appendTo("#tandemnine tbody");
+		}
+
+		else{ //just appends to tandemnine. There will rarely be a case where there will be more than 9 posts shown on the screen
+			$(tblRow).appendTo("#tandemnine tbody");
+}
+		console.log("just appended");
+
+
+}
+
+
+         if ((document.getElementById('tandem').clientHeight + document.getElementById('tandemsix').clientHeight) >= 1){//leave this here and ignore it
+console.log("it is greater than 1 for first col. this if statement might be the cause of an error");
+//$( "#tandem" ).remove();
+
+
+let maxHeight = 400;//max height is used to indicate the screen height. Change this variable as needed.
+//the code below gets the height of each post                                                                
+var tandemheight = document.getElementById('tandem').clientHeight;
+var tandemtwoheight = document.getElementById('tandemtwo').clientHeight;
+var tandemthreeheight = document.getElementById('tandemthree').clientHeight;
+var tandemfourheight = document.getElementById('tandemfour').clientHeight;
+var tandemfiveheight = document.getElementById('tandemfive').clientHeight;
+var tandemsixheight = document.getElementById('tandemsix').clientHeight;
+var tandemsevenheight = document.getElementById('tandemseven').clientHeight;
+var tandemeightheight = document.getElementById('tandemeight').clientHeight;
+var tandemnineheight = document.getElementById('tandemnine').clientHeight;
+
+//the code below ets the height of each container
+var oneheight = document.getElementById('one').clientHeight;
+var twoheight = document.getElementById('two').clientHeight;
+var threeheight = document.getElementById('three').clientHeight;
+var fourheight = document.getElementById('four').clientHeight;
+var fiveheight = document.getElementById('five').clientHeight;
+
+var neverAppended = [];// the posts that are too big to append to document are stored in this array
+console.log(tandemnineheight);
+
+var postsleft = ["tandem", "tandemtwo", "tandmethree", "tandemfour", "tandemfive", "tandemsix", "tandemseven", "tandemeight", "tandemnine"];//intitial posts to append to the document
+
+var postsheight = [tandemheight, tandemtwoheight, tandemthreeheight, tandemfourheight, tandemfiveheight, tandemsixheight, tandemsevenheight, tandemeightheight, tandemnineheight];//each post height. each index correspponds to "postsleft" array. for example. postsleft[0] == postsheight[0] height
+
+var pairs = [];//get each 2 starting from beggining of the array
+
+
+// sorting code below
+var lastColumn;
+var onepost = false;
+var twopost = false;
+var threepost = false;
+var fourpost = false;
+var fivepost = false;
+var sixpost = false;
+var sevenpost = false;
+var eightpost = false;
+var ninepost = false;
+
+var goodornot = ["ignorethiskeepithere", false, false, false, false, false, false, false, false];
+var falseposts = [];
+console.log(goodornot);
+console.log(" pairs is below");
+console.log(pairs);
+
+//the code below checks if any container exceeds the maxHeight, and the n removes if if true 
+//the array pairs is used to identify the pairs that will be inserted to the table under each other. for example, pairs[0] and pairs[1] might be posts 1 and 2 if none of those posts exceed screen size
+if (tandemheight + tandemtwoheight <= maxHeight){
+	pairs.push("tandem");
+	pairs.push("tandemtwo");
+	onepost = true;
+	sixpost = true;
+	goodornot[1] = true;
+	goodornot[2] = true;
+	lastColumn = "one";
+}
+else {
+falseposts.push("tandem");
+falseposts.push("tandemtwo");
+}
+
+if (tandemthreeheight + tandemfourheight <= maxHeight){
+	pairs.push("tandemthree");
+	pairs.push("tandemfour");
+	twopost = true;
+	sevenpost = true;
+	goodornot[3] = true;
+	goodornot[4] = true;
+	lastColumn = "two";
+}
+else {
+falseposts.push("tandemthree");
+falseposts.push("tandemfour");
+}
+
+if (tandemfiveheight + tandemsixheight <= maxHeight){
+	pairs.push("tandemfive");
+	pairs.push("tandemsix");
+	threepost = true;
+	eightpost = true;
+	goodornot[5] = true;
+	goodornot[6] = true;
+	lastColumn = "three";
+}
+else {
+falseposts.push("tandemfive");
+falseposts.push("tandemsix");
+}
+
+if (tandemsevenheight + tandemeightheight <= maxHeight){
+	pairs.push("tandemseven");
+	pairs.push("tandemeight");
+	fourpost = true;
+	ninepost = true;
+	goodornot[7] = true;
+	goodornot[8] = true;
+	lastColumn = "four";
+}
+else {
+falseposts.push("tandemseven");
+falseposts.push("tandemeight");
+}
+/*
+if (tandemfiveheight <= 300){
+	pairs.push("tandemnine");
+	fivepost = true;
+	goodornot[9] = true;
+	console.log(goodornot[9]);
+}
+else {
+falseposts.push("tandemnine");
+
+}
+*/
+/*
+if (goodornot.includes(false)) {
+console.log("contains false after parsing");
+for (x = 1; x < goodornot.length; x++){
+	if (goodornot[x] == false){
+		falseposts.push(x);
+	}
+}
+
+console.log(falseposts);
+
+}
+*/
+
+
+	$( "#tandem td" ).remove();
+	$( "#tandemtwo td" ).remove();
+	$( "#tandemthree td" ).remove();
+	$( "#tandemfour td" ).remove();
+	$( "#tandemfive td" ).remove();
+	$( "#tandemsix td" ).remove();
+	$( "#tandemseven td" ).remove();
+	$( "#tandemeight td" ).remove();
+	$( "#tandemnine td" ).remove();
+
+
+
+// height of the containers after removing some posts
+
+
+
+var oneheight; 
+var twoheight;
+var threeheight;
+var fourheight;
+var fiveheight;
+
+
+
+console.log(tandemnineheight);
+if (falseposts.length == 0){
+	console.log(tandemnineheight);
+for (x = 1; x < 10; x++){//start the for loop at 1
+	
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[x - 1]+'">' + "<br>" + pfinal[x] + "</td>" ;
+
+var alternatetblRow =  "<td id=\"alternatesadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[x - 1]+'">' + "<br>" + pfinal[x] + "</td>" ;
+
+
+if (x == 1){
+			$(tblRow).appendTo("#tandem tbody");
+		//$(alternatetblRow).appendTo("#alternatetandem tbody");
+}
+		else if (x== 2){
+			$(tblRow).appendTo("#tandemtwo tbody");
+		
+		//$(alternatetblRow).appendTo("#alternatetandemtwo tbody");
+}
+		else if (x== 3){
+			$(tblRow).appendTo("#tandemthree tbody");
+		
+		//$(alternatetblRow).appendTo("#alternatetandemthree tbody");
+}
+		else if (x== 4){
+			$(tblRow).appendTo("#tandemfour tbody");
+		
+		//$(alternatetblRow).appendTo("#alternatetandemfour tbody");
+}
+		else if (x== 5){
+			$(tblRow).appendTo("#tandemfive tbody");
+		
+		//$(alternatetblRow).appendTo("#alternatetandemfive tbody");
+}
+		else if (x== 6){
+			$(tblRow).appendTo("#tandemsix tbody");
+		
+		//$(alternatetblRow).appendTo("#alternatetandemsix tbody");
+}
+		else if (x== 7){
+			$(tblRow).appendTo("#tandemseven tbody");
+		
+		//$(alternatetblRow).appendTo("#alternatetandemseven tbody");
+}
+		else if (x== 8){
+			$(tblRow).appendTo("#tandemeight tbody");
+		
+		//$(alternatetblRow).appendTo("#alternatetandemeight tbody");
+}
+		/*
+		else if (x== 9){
+			$(tblRow).appendTo("#tandemnine tbody");
+		}
+
+		else{ //just appends to tandemnine. There will rarely be a case where there will be more than 9 posts shown on the screen
+			$(tblRow).appendTo("#tandemnine tbody");
+}
+*/
+		console.log("just appended");
+
+
+}
+
+	//append everything back to the table
+}
+
+else {//move posts around
+
+console.log("pairs are " + pairs);
+console.log("false posts are " + falseposts);
+console.log(tandemnineheight);
+
+
+
+for (x = 0; x < pairs.length; x++){
+	if (pairs[x] == "tandem"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[0]+'">' + "<br>" + pfinal[1] + "</td>";
+$(tblRow).appendTo("#tandem tbody");
+
+var alternatetblRow =  "<td id=\"alternatesadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[1]+'">' + "<br>" + pfinal[2] + "</td>";
+$(alternatetblRow).appendTo("#tandemtwo tbody");
+	}
+
+
+
+else if (pairs[x] == "tandemthree"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[2]+'">' + "<br>" + pfinal[3] + "</td>";
+$(tblRow).appendTo("#tandemthree tbody");
+
+var alternatetblRow =  "<td id=\"alternatesadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[3]+'">' + "<br>" + pfinal[4] + "</td>";
+$(alternatetblRow).appendTo("#tandemfour tbody");
+	}
+
+
+	else if (pairs[x] == "tandemfive"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[4]+'">' + "<br>" + pfinal[5] + "</td>";
+$(tblRow).appendTo("#tandemfive tbody");
+
+var alternatetblRow =  "<td id=\"alternatesadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[5]+'">' + "<br>" + pfinal[6] + "</td>";
+$(alternatetblRow).appendTo("#tandemsix tbody");
+	}
+
+	else if (pairs[x] == "tandemseven"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[6]+'">' + "<br>" + pfinal[7] + "</td>";
+$(tblRow).appendTo("#tandemseven tbody");
+
+var alternatetblRow =  "<td id=\"alternatesadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[7]+'">' + "<br>" + pfinal[8] + "</td>";
+$(alternatetblRow).appendTo("#tandemeight tbody");
+	}
+
+	else if (pairs[x] == "tandemnine"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[8]+'">' + "<br>" + pfinal[9] + "</td>";
+$(tblRow).appendTo("#tandemnine tbody");
+
+
+	}
+
+
+
+}//end of code to insert columns that do not need alteration
+
+
+
+oneheight = document.getElementById('one').clientHeight;
+twoheight = document.getElementById('two').clientHeight;
+threeheight = document.getElementById('three').clientHeight;
+fourheight = document.getElementById('four').clientHeight;
+fiveheight = document.getElementById('five').clientHeight;// this height should be less than 330. make sure than it is less than 330 through out the code
+
+
+
+//start of code to isert posts that are too big
+
+
+console.log(tandemnineheight);
+console.log(falseposts);
+
+var currentPost;
+var currentPostHeight;
+for (x = 0; x < falseposts.length; x++){
+currentPost = falseposts[x];
+if (currentPost == "tandem"){
+	currentPostHeight = tandemheight;
+	console.log(currentPostHeight);
+}
+else if (currentPost == "tandemtwo"){
+	currentPostHeight = tandemtwoheight;
+	console.log(currentPostHeight);
+}
+else if (currentPost == "tandemthree"){
+	currentPostHeight = tandemthreeheight;
+	console.log(currentPostHeight);
+}
+else if (currentPost == "tandemfour"){
+	currentPostHeight = tandemfourheight;
+	console.log(currentPostHeight);
+}
+else if (currentPost == "tandemfive"){
+	currentPostHeight = tandemfiveheight;
+	console.log(currentPostHeight);
+}
+else if (currentPost == "tandemsix"){
+	currentPostHeight = tandemsixheight;
+	console.log(currentPostHeight);
+}
+else if (currentPost == "tandemseven"){
+	currentPostHeight = tandemsevenheight;
+	console.log(currentPostHeight);
+}
+else if (currentPost == "tandemeight"){
+	currentPostHeight = tandemeightheight;
+	console.log(currentPostHeight);
+}
+else if (currentPost == "tandemnine"){
+	currentPostHeight = tandemnineheight;
+	console.log(currentPostHeight);
+
+}
+else {
+	console.log("else");
+}
+
+var coltested = Math.min(oneheight, twoheight, threeheight, fourheight);	// excludes the last column
+console.log(coltested);
+
+
+
+
+/*
+
+insert first post for each pair in the original column.
+insert second post into eherver it fits
+
+*/
+
+
+console.log("current post is " + currentPost);
+if (currentPostHeight + oneheight< maxHeight){
+
+if (currentPost == "tandem"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[0]+'">' + "<br>" + pfinal[1] + "</td>";
+$(tblRow).appendTo("#tandemtwo tbody");
+}
+else if (currentPost == "tandemtwo"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[1]+'">' + "<br>" + pfinal[2] + "</td>";
+$(tblRow).appendTo("#tandemtwo tbody");
+}
+else if (currentPost == "tandemthree"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[2]+'">' + "<br>" + pfinal[3] + "</td>";
+$(tblRow).appendTo("#tandemtwo tbody");
+}
+else if (currentPost == "tandemfour"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[3]+'">' + "<br>" + pfinal[4] + "</td>";
+$(tblRow).appendTo("#tandemtwo tbody");
+}
+else if (currentPost == "tandemfive"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[4]+'">' + "<br>" + pfinal[5] + "</td>";
+$(tblRow).appendTo("#tandemtwo tbody");
+}
+else if (currentPost == "tandemsix"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[5]+'">' + "<br>" + pfinal[6] + "</td>";
+$(tblRow).appendTo("#tandemtwo tbody");
+}
+else if (currentPost == "tandemseven"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[6]+'">' + "<br>" + pfinal[7] + "</td>";
+$(tblRow).appendTo("#tandemtwo tbody");
+}
+else if (currentPost == "tandemeight"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[7]+'">' + "<br>" + pfinal[8] + "</td>";
+$(tblRow).appendTo("#tandemtwo tbody");
+}
+else {// current post = tandemnine
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[8]+'">' + "<br>" + pfinal[9] + "</td>";
+$(tblRow).appendTo("#tandemtwo tbody");
+}
+
+
+}
+
+
+else if (currentPostHeight + twoheight< maxHeight){
+if (currentPost == "tandem"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[0]+'">' + "<br>" + pfinal[1] + "</td>";
+$(tblRow).appendTo("#tandemfour tbody");
+}
+else if (currentPost == "tandemtwo"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[1]+'">' + "<br>" + pfinal[2] + "</td>";
+$(tblRow).appendTo("#tandemfour tbody");
+}
+else if (currentPost == "tandemthree"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[2]+'">' + "<br>" + pfinal[3] + "</td>";
+$(tblRow).appendTo("#tandemfour tbody");
+}
+else if (currentPost == "tandemfour"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[3]+'">' + "<br>" + pfinal[4] + "</td>";
+$(tblRow).appendTo("#tandemfour tbody");
+}
+else if (currentPost == "tandemfive"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[4]+'">' + "<br>" + pfinal[5] + "</td>";
+$(tblRow).appendTo("#tandemfour tbody");
+}
+else if (currentPost == "tandemsix"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[5]+'">' + "<br>" + pfinal[6] + "</td>";
+$(tblRow).appendTo("#tandemfour tbody");
+}
+else if (currentPost == "tandemseven"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[6]+'">' + "<br>" + pfinal[7] + "</td>";
+$(tblRow).appendTo("#tandemfour tbody");
+}
+else if (currentPost == "tandemeight"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[7]+'">' + "<br>" + pfinal[8] + "</td>";
+$(tblRow).appendTo("#tandemfour tbody");
+}
+else {// current post = tandemnine
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[8]+'">' + "<br>" + pfinal[9] + "</td>";
+$(tblRow).appendTo("#tandemfour tbody");
+}
+
+
+}
+
+
+
+
+else if (currentPostHeight + threeheight< maxHeight){
+if (currentPost == "tandem"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[0]+'">' + "<br>" + pfinal[1] + "</td>";
+$(tblRow).appendTo("#tandemsix tbody");
+}
+else if (currentPost == "tandemtwo"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[1]+'">' + "<br>" + pfinal[2] + "</td>";
+$(tblRow).appendTo("#tandemsix tbody");
+}
+else if (currentPost == "tandemthree"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[2]+'">' + "<br>" + pfinal[3] + "</td>";
+$(tblRow).appendTo("#tandemsix tbody");
+}
+else if (currentPost == "tandemfour"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[3]+'">' + "<br>" + pfinal[4] + "</td>";
+$(tblRow).appendTo("#tandemsix tbody");
+}
+else if (currentPost == "tandemfive"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[4]+'">' + "<br>" + pfinal[5] + "</td>";
+$(tblRow).appendTo("#tandemsix tbody");
+}
+else if (currentPost == "tandemsix"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[5]+'">' + "<br>" + pfinal[6] + "</td>";
+$(tblRow).appendTo("#tandemsix tbody");
+}
+else if (currentPost == "tandemseven"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[6]+'">' + "<br>" + pfinal[7] + "</td>";
+$(tblRow).appendTo("#tandemsix tbody");
+}
+else if (currentPost == "tandemeight"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[7]+'">' + "<br>" + pfinal[8] + "</td>";
+$(tblRow).appendTo("#tandemsix tbody");
+}
+else {// current post = tandemnine
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[8]+'">' + "<br>" + pfinal[9] + "</td>";
+$(tblRow).appendTo("#tandemsix tbody");
+}
+
+
+}
+
+
+
+else if (currentPostHeight + fourheight < maxHeight){
+if (currentPost == "tandem"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[0]+'">' + "<br>" + pfinal[1] + "</td>";
+$(tblRow).appendTo("#tandemeight tbody");
+}
+else if (currentPost == "tandemtwo"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[1]+'">' + "<br>" + pfinal[2] + "</td>";
+$(tblRow).appendTo("#tandemeight tbody");
+}
+else if (currentPost == "tandemthree"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[2]+'">' + "<br>" + pfinal[3] + "</td>";
+$(tblRow).appendTo("#tandemeight tbody");
+}
+else if (currentPost == "tandemfour"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[3]+'">' + "<br>" + pfinal[4] + "</td>";
+$(tblRow).appendTo("#tandemeight tbody");
+}
+else if (currentPost == "tandemfive"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[4]+'">' + "<br>" + pfinal[5] + "</td>";
+$(tblRow).appendTo("#tandemeight tbody");
+}
+else if (currentPost == "tandemsix"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[5]+'">' + "<br>" + pfinal[6] + "</td>";
+$(tblRow).appendTo("#tandemeight tbody");
+}
+else if (currentPost == "tandemseven"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[6]+'">' + "<br>" + pfinal[7] + "</td>";
+$(tblRow).appendTo("#tandemeight tbody");
+}
+else if (currentPost == "tandemeight"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[7]+'">' + "<br>" + pfinal[8] + "</td>";
+$(tblRow).appendTo("#tandemeight tbody");
+}
+else {// current post = tandemnine
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[8]+'">' + "<br>" + pfinal[9] + "</td>";
+$(tblRow).appendTo("#tandemeight tbody");
+}
+
+
+}
+else {
+	console.log("Error, never appended to table  " + currentPost + " " + currentPostHeight);
+	neverAppended.push(currentPost);
+}
+
+
+
+
+
+}
+
+
+
+
+//end of code to insert posts that are too big
+
+
+console.log(neverAppended);
+console.log(lastColumn);
+
+if (neverAppended.length > 0){
+	
+	for (x = 0; x < neverAppended.length; x++){//change order of for loop if necessary (start at 0)
+console.log("inside for loop for never appended");
+console.log(neverAppended[x]);
+
+
+
+
+		if (lastColumn == "four" || lastColumn == "three" || lastColumn == "two" || lastColumn == "one"){
+			$( "#four" ).remove();
+			if (neverAppended[x] == "tandem"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[0]+'">' + "<br>" + pfinal[1] + "</td>";
+$(tblRow).appendTo("#alternatetandemseven tbody");
+console.log("never appended is true");
+neverAppended.splice(x, 1);
+}
+else if (neverAppended[x] == "tandemtwo"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[1]+'">' + "<br>" + pfinal[2] + "</td>";
+$(tblRow).appendTo("#alternatetandemseven tbody");
+console.log("never appended is true");
+neverAppended.splice(x, 1);
+}
+else if (neverAppended[x] == "tandemthree"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[2]+'">' + "<br>" + pfinal[3] + "</td>";
+$(tblRow).appendTo("#alternatetandemseven tbody");
+console.log("never appended is true");
+neverAppended.splice(x, 1);
+}
+else if (neverAppended[x] == "tandemfour"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[3]+'">' + "<br>" + pfinal[4] + "</td>";
+$(tblRow).appendTo("#alternatetandemseven tbody");
+console.log("never appended is true");
+neverAppended.splice(x, 1);
+}
+else if (neverAppended[x] == "tandemfive"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[4]+'">' + "<br>" + pfinal[5] + "</td>";
+$(tblRow).appendTo("#alternatetandemseven tbody");
+console.log("never appended is true");
+neverAppended.splice(x, 1);
+}
+else if (neverAppended[x] == "tandemsix"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[5]+'">' + "<br>" + pfinal[6] + "</td>";
+$(tblRow).appendTo("#alternatetandemseven tbody");
+console.log("never appended is true");
+neverAppended.splice(x, 1);
+}
+else if (neverAppended[x] == "tandemseven"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[6]+'">' + "<br>" + pfinal[7] + "</td>";
+$(tblRow).appendTo("#alternatetandemseven tbody");
+console.log("never appended is true");
+neverAppended.splice(x, 1);
+}
+else if (neverAppended[x] == "tandemeight"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[7]+'">' + "<br>" + pfinal[8] + "</td>";
+$(tblRow).appendTo("#alternatetandemseven tbody");
+console.log("never appended is true");
+neverAppended.splice(x, 1);
+}
+/*
+else {// current post = tandemnine
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[8]+'">' + "<br>" + pfinal[9] + "</td>";
+$(tblRow).appendTo("#alternatetandemseven tbody");
+}
+*/
+lastColumn = "alternatefour";
+console.log("appended " + neverAppended[x]  +" to table");
+
+		}
+
+
+		else if (lastColumn == "alternatefour"){
+			$( "#alternatefour" ).remove();
+			if (neverAppended[x] == "tandem"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[0]+'">' + "<br>" + pfinal[1] + "</td>";
+$(tblRow).appendTo("#secondalternatetandemseven tbody");
+console.log("never appended is true");
+neverAppended.splice(x, 1);
+}
+else if (neverAppended[x] == "tandemtwo"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[1]+'">' + "<br>" + pfinal[2] + "</td>";
+$(tblRow).appendTo("#secondalternatetandemseven tbody");
+console.log("never appended is true");
+neverAppended.splice(x, 1);
+}
+else if (neverAppended[x] == "tandemthree"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[2]+'">' + "<br>" + pfinal[3] + "</td>";
+$(tblRow).appendTo("#secondalternatetandemseven tbody");
+console.log("never appended is true");
+neverAppended.splice(x, 1);
+}
+else if (neverAppended[x] == "tandemfour"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[3]+'">' + "<br>" + pfinal[4] + "</td>";
+$(tblRow).appendTo("#secondalternatetandemseven tbody");
+console.log("never appended is true");
+neverAppended.splice(x, 1);
+}
+else if (neverAppended[x] == "tandemfive"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[4]+'">' + "<br>" + pfinal[5] + "</td>";
+$(tblRow).appendTo("#secondalternatetandemseven tbody");
+console.log("never appended is true");
+neverAppended.splice(x, 1);
+}
+else if (neverAppended[x] == "tandemsix"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[5]+'">' + "<br>" + pfinal[6] + "</td>";
+$(tblRow).appendTo("#secondalternatetandemseven tbody");
+console.log("never appended is true");
+neverAppended.splice(x, 1);
+}
+else if (neverAppended[x] == "tandemseven"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[6]+'">' + "<br>" + pfinal[7] + "</td>";
+$(tblRow).appendTo("#secondalternatetandemseven tbody");
+console.log("never appended is true");
+neverAppended.splice(x, 1);
+}
+else if (neverAppended[x] == "tandemeight"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[7]+'">' + "<br>" + pfinal[8] + "</td>";
+$(tblRow).appendTo("#secondalternatetandemseven tbody");
+console.log("never appended is true");
+neverAppended.splice(x, 1);
+}
+/*
+else {// current post = tandemnine
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[8]+'">' + "<br>" + pfinal[9] + "</td>";
+$(tblRow).appendTo("#alternatetandemseven tbody");
+}
+*/
+lastColumn = "thirdalternatefour";
+console.log("appended " + neverAppended[x]  +" to table");
+		}
+
+
+
+else if (lastColumn == "secondalternatefour"){
+			$( "#secondalternatefour" ).remove();
+			if (neverAppended[x] == "tandem"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[0]+'">' + "<br>" + pfinal[1] + "</td>";
+$(tblRow).appendTo("#thirdalternatetandemseven tbody");
+console.log("never appended is true");
+neverAppended.splice(x, 1);
+}
+else if (neverAppended[x] == "tandemtwo"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[1]+'">' + "<br>" + pfinal[2] + "</td>";
+$(tblRow).appendTo("#thirdalternatetandemseven tbody");
+console.log("never appended is true");
+neverAppended.splice(x, 1);
+}
+else if (neverAppended[x] == "tandemthree"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[2]+'">' + "<br>" + pfinal[3] + "</td>";
+$(tblRow).appendTo("#thirdalternatetandemseven tbody");
+console.log("never appended is true");
+neverAppended.splice(x, 1);
+}
+else if (neverAppended[x] == "tandemfour"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[3]+'">' + "<br>" + pfinal[4] + "</td>";
+$(tblRow).appendTo("#thirdalternatetandemseven tbody");
+console.log("never appended is true");
+neverAppended.splice(x, 1);
+}
+else if (neverAppended[x] == "tandemfive"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[4]+'">' + "<br>" + pfinal[5] + "</td>";
+$(tblRow).appendTo("#thirdalternatetandemseven tbody");
+console.log("never appended is true");
+neverAppended.splice(x, 1);
+}
+else if (neverAppended[x] == "tandemsix"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[5]+'">' + "<br>" + pfinal[6] + "</td>";
+$(tblRow).appendTo("#thirdalternatetandemseven tbody");
+console.log("never appended is true");
+neverAppended.splice(x, 1);
+}
+else if (neverAppended[x] == "tandemseven"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[6]+'">' + "<br>" + pfinal[7] + "</td>";
+$(tblRow).appendTo("#thirdalternatetandemseven tbody");
+console.log("never appended is true");
+neverAppended.splice(x, 1);
+}
+else if (neverAppended[x] == "tandemeight"){
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[7]+'">' + "<br>" + pfinal[8] + "</td>";
+$(tblRow).appendTo("#thirdalternatetandemseven tbody");
+console.log("never appended is true");
+neverAppended.splice(x, 1);
+}
+/*
+else {// current post = tandemnine
+var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[8]+'">' + "<br>" + pfinal[9] + "</td>";
+$(tblRow).appendTo("#alternatetandemseven tbody");
+}
+*/
+lastColumn = "nomorelastcolumn";
+console.log("appended " + neverAppended[x]  +" to table");
+		}
+
+
+	}
+}
+
+
+//end of else statement
+}
+
+
+//code below to insert posts into the last column
+if (neverAppended.length > 0){
+	for (x = 0; x < neverAppended.length; x++){
+	
+	console.log(neverAppended);
+	if (neverAppended[x] == "tandem") {
+		if (tandemheight < 330){
+
+			var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[0]+'">' + "<br>" + pfinal[1] + "</td>";
+$(tblRow).appendTo("#tandemnine tbody");
+break;
+		}
+	}
+
+
+
+else if (neverAppended[x] == "tandemtwo") {
+		if (tandemtwoheight < 330){
+
+			var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[1]+'">' + "<br>" + pfinal[2] + "</td>";
+$(tblRow).appendTo("#tandemnine tbody");
+break;
+
+		}
+	}
+
+
+
+	else if (neverAppended[x] == "tandemthree") {
+		if (tandemthreeheight < 330){
+
+			var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[2]+'">' + "<br>" + pfinal[3] + "</td>";
+$(tblRow).appendTo("#tandemnine tbody");
+break;
+		}
+	}
+
+
+else if (neverAppended[x] == "tandemfour") {
+		if (tandemfourheight < 330){
+
+			var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[3]+'">' + "<br>" + pfinal[4] + "</td>";
+$(tblRow).appendTo("#tandemnine tbody");
+break;
+		}
+	}
+
+
+
+	else if (neverAppended[x] == "tandemfive") {
+		if (tandemfiveheight < 330){
+
+			var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[4]+'">' + "<br>" + pfinal[5] + "</td>";
+$(tblRow).appendTo("#tandemnine tbody");
+break;
+		}
+	}
+
+
+	else if (neverAppended[x] == "tandemsix") {
+		if (tandemsixheight < 330){
+
+			var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[5]+'">' + "<br>" + pfinal[6] + "</td>";
+$(tblRow).appendTo("#tandemnine tbody");
+break;
+		}
+	}
+
+
+
+
+	else if (neverAppended[x] == "tandemseven") {
+		if (tandemsevenheight < 330){
+
+			var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[6]+'">' + "<br>" + pfinal[7] + "</td>";
+$(tblRow).appendTo("#tandemnine tbody");
+break;
+		}
+	}
+
+
+	else if (neverAppended[x] == "tandemeight") {
+		if (tandemeightheight < 330){
+
+			var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[7]+'">' + "<br>" + pfinal[8] + "</td>";
+$(tblRow).appendTo("#tandemnine tbody");
+break;
+		}
+	}
+
+
+	else if (neverAppended[x] == "tandemnine") {
+		if (tandemheight < 330){
+
+			var tblRow =  "<td id=\"sadude\">" + 'link to an image of the header of your account goes here' + '<img src="'+ imagearrayfinal[8]+'">' + "<br>" + pfinal[9] + "</td>";
+$(tblRow).appendTo("#tandemnine tbody");
+break;
+
+		}
+	}
+
+
+}
+
+}
+
+
+//below is code to remove the last column if it is overlapping with the icon in bottom right corner
+console.log("executing");
+var numOfCols = 0;
+let h = 210;
+if (one.clientHeight > h){
+numOfCols = numOfCols + 1;
+}
+if (alternateone.clientHeight > h){
+numOfCols = numOfCols + 1;
+}
+if (two.clientHeight > h){
+numOfCols = numOfCols + 1;
+}
+if (alternatetwo.clientHeight > h){
+numOfCols = numOfCols + 1;
+}
+if (three.clientHeight > h){
+numOfCols = numOfCols + 1;
+}
+if (alternatethree.clientHeight > h){
+numOfCols = numOfCols + 1;
+}
+if (four.clientHeight > h){
+numOfCols = numOfCols + 1;
+}
+if (alternatefour.clientHeight > h){
+numOfCols = numOfCols + 1;
+}
+if (secondalternatefour.clientHeight > h){
+numOfCols = numOfCols + 1;
+}
+if (thirdalternatefour.clientHeight > h){
+numOfCols = numOfCols + 1;
+}
+console.log(numOfCols);
+
+//code to remove last element if it is overlapping.
+//find a way to get one post out of the column and insert it in column five
+var countX = 0;
+if (numOfCols > 3){
+	console.log("numOfCols is greater than 3");
+	console.log(thirdalternatefour.clientHeight);
+	console.log(secondalternatefour.clientHeight);
+	console.log(alternatefour.clientHeight);
+	console.log(alternatethree.clientHeight);
+	console.log(three.clientHeight);
+	/*
+	if (thirdalternatefour.clientHeight > h){
+$( "#thirdalternatefour" ).remove();
+	}
+
+	else if (secondalternatefour.clientHeight > h){
+$( "#secondalternatefour" ).remove();
+	}
+	else if (alternatefour.clientHeight > h){
+$( "#alternatefour" ).remove();
+	}
+	else if (alternatethree.clientHeight > h){
+$( "#alternatethree" ).remove();
+	}
+	
+	else if (three.clientHeight > h){
+$( "#three" ).remove();
+	}
+	*/
+	//$( "#one" ).remove();
+
+
+
+
+if (thirdalternatetandemeight.clientHeight > h){
+countX = countX + 1;
+$( "#thirdalternatetandemeight" ).remove();
+	} 
+
+	if (thirdalternatetandemseven.clientHeight > h){
+countX = countX + 1;
+$( "#thirdalternatetandemseven" ).remove();
+	} 
+if (countX > 1){
+		return;
+	}
+
+	if (secondalternatetandemeight.clientHeight > h){
+countX = countX + 1;
+$( "#secondalternatetandemeight" ).remove();
+	} 
+
+
+	
+	if (countX > 1){
+		return;
+	}
+
+
+	if (tandemnine.clientHeight > h){
+countX = countX + 1;
+$( "#tandemnine" ).remove();
+	} 
+	
+	if (alternatetandemeight.clientHeight > h){
+countX = countX + 1;
+$( "#alternatetandemeight" ).remove();
+	} 
+	
+	if (countX > 1){
+		return;
+	}
+
+	if (tandemeight.clientHeight > h){
+countX = countX + 1;
+$( "#tandemeight" ).remove();
+	} 
+
+	if (countX > 1){
+		return;
+	}
+
+	if (alternatetandemseven.clientHeight > h){
+countX = countX + 1;
+$( "#alternatetandemseven" ).remove();
+	} 
+
+		if (countX > 1){
+		return;
+	}
+
+	if (tandemseven.clientHeight > h){
+countX = countX + 1;
+$( "#tandemseven" ).remove();
+	} 
+
+
+	if (countX > 1){
+		return;
+	}
+
+	if (alternatetandemsix.clientHeight > h){
+countX = countX + 1;
+$( "#alternatetandemsix" ).remove();
+	} 
+
+if (countX > 1){
+		return;
+	}
+
+
+
+if (tandemsix.clientHeight > h){
+countX = countX + 1;
+$( "#tandemsix" ).remove();
+	} 
+
+
+	if (countX > 1){
+		return;
+	}
+
+
+if (tandemfive.clientHeight > h){
+countX = countX + 1;
+$( "#tandemfive" ).remove();
+	} 
+
+
+	if (countX > 1){
+		return;
+	}
+
+
+
+}
+
+
+
+
+
+
+         }
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+	},
+	error: function(data){
+		console.log(data); // send the error notifications to console
+	}
+});
+	</script>
+	
+
+<div id="one">
+
+ <table id= "tandem" border=0px>
+							  <thead>
+							  	
+
+							        </thead>
+							      <tbody>
+<p id="dot">.</p>
+							       </tbody>
+							   </table>
+
+							   <table id= "tandemtwo" border=0px>
+							  <thead>
+
+							        </thead>
+							      <tbody>
+							      	<p id="dot">.</p>
+
+							       </tbody>
+							   </table>
+							</div>
+
+
+
+
+
+
+<div id="alternateone">
+
+ <table id= "alternatetandem" border=0px>
+							  <thead>
+							  	
+
+							        </thead>
+							      <tbody>
+<p id="dot">.</p>
+							       </tbody>
+							   </table>
+
+							   <table id= "alternatetandemtwo" border=0px>
+							  <thead>
+
+							        </thead>
+							      <tbody>
+							      	<p id="dot">.</p>
+
+							       </tbody>
+							   </table>
+							</div>
+
+
+
+
+
+
+							<div id="two">
+
+							   <table id= "tandemthree" border=0px>
+							  <thead>
+
+							        </thead>
+							      <tbody>
+<p id="dot">.</p>
+							       </tbody>
+							   </table>
+							   <table id= "tandemfour" border=0px>
+							  <thead>
+
+							        </thead>
+							      <tbody>
+<p id="dot">.</p>
+							       </tbody>
+							   </table>
+
+							</div>
+
+
+
+
+
+
+<div id="alternatetwo">
+
+							   <table id= "alternatetandemthree" border=0px>
+							  <thead>
+
+							        </thead>
+							      <tbody>
+<p id="dot">.</p>
+							       </tbody>
+							   </table>
+							   <table id= "alternatetandemfour" border=0px>
+							  <thead>
+
+							        </thead>
+							      <tbody>
+<p id="dot">.</p>
+							       </tbody>
+							   </table>
+
+							</div>
+
+
+
+
+
+							<div id="three">
+
+							   <table id= "tandemfive" border=0px>
+							  <thead>
+
+							        </thead>
+							      <tbody>
+<p id="dot">.</p>
+							       </tbody>
+							   </table>
+							   <table id= "tandemsix" border=0px>
+							  <thead>
+
+							        </thead>
+							      <tbody>
+<p id="dot">.</p>
+							       </tbody>
+							   </table>
+
+							</div>
+
+
+
+
+
+
+<div id="alternatethree">
+
+							   <table id= "alternatetandemfive" border=0px>
+							  <thead>
+
+							        </thead>
+							      <tbody>
+<p id="dot">.</p>
+							       </tbody>
+							   </table>
+							   <table id= "alternatetandemsix" border=0px>
+							  <thead>
+
+							        </thead>
+							      <tbody>
+<p id="dot">.</p>
+							       </tbody>
+							   </table>
+
+							</div>
+
+
+
+
+
+
+
+							<div id="four">
+
+							   <table id= "tandemseven" border=0px>
+							  <thead>
+
+							        </thead>
+							      <tbody>
+<p id="dot">.</p>
+							       </tbody>
+							   </table>
+							   <table id= "tandemeight" border=0px>
+							  <thead>
+
+							        </thead>
+							      <tbody>
+<p id="dot">.</p>
+							       </tbody>
+							   </table>
+
+							</div>
+
+
+
+
+<div id="alternatefour">
+
+							   <table id= "alternatetandemseven" border=0px>
+							  <thead>
+
+							        </thead>
+							      <tbody>
+<p id="dot">.</p>
+							       </tbody>
+							   </table>
+							   <table id= "alternatetandemeight" border=0px>
+							  <thead>
+
+							        </thead>
+							      <tbody>
+<p id="dot">.</p>
+							       </tbody>
+							   </table>
+
+							</div>
+
+
+
+
+							<div id="secondalternatefour">
+
+							   <table id= "secondalternatetandemseven" border=0px>
+							  <thead>
+
+							        </thead>
+							      <tbody>
+<p id="dot">.</p>
+							       </tbody>
+							   </table>
+							   <table id= "secondalternatetandemeight" border=0px>
+							  <thead>
+
+							        </thead>
+							      <tbody>
+<p id="dot">.</p>
+							       </tbody>
+							   </table>
+
+							</div>
+
+
+
+
+<div id="thirdalternatefour">
+
+							   <table id= "thirdalternatetandemseven" border=0px>
+							  <thead>
+
+							        </thead>
+							      <tbody>
+<p id="dot">.</p>
+							       </tbody>
+							   </table>
+							   <table id= "thirdalternatetandemeight" border=0px>
+							  <thead>
+
+							        </thead>
+							      <tbody>
+<p id="dot">.</p>
+							       </tbody>
+							   </table>
+
+							</div>
+
+
+
+
+							<div id="five">
+
+							   <table id= "tandemnine" border=0px>
+							  <thead>
+
+							        </thead>
+							      <tbody>
+<p id="dot">.</p>
+							       </tbody>
+							   </table>
+							</div>
+
+							
+	</head>
+	<body>
+		<style>
+		#dot {
+		/*  insert code here for rremoving ecxtra spaces */
+		width: 10px;
+		height: 2px;
+		}
+		#one {
+			float: left;
+			padding-left: 10px;
+
+		}
+		#two {
+			float: left;
+			padding-left: 10px;
+		}
+		#three {
+			float: left;
+			padding-left: 10px;
+		}
+		#four {
+			float: left;
+			padding-left: 10px;
+		}
+		#five {
+			float: left;
+			padding-left: 10px;
+		}
+		#alternateone {
+			float: left;
+			padding-left: 10px;
+			/*display: hidden;*/
+		}
+		#alternatetwo {
+			float: left;
+			padding-left: 10px;
+			/*display: hidden;*/
+		}
+		#alternatethree {
+			float: left;
+			padding-left: 10px;
+			/*display:hidden;*/
+		}
+		#alternatefour {
+			float: left;
+			padding-left: 10px;
+			/*display:hidden;*/
+		}
+			#secondalternatefour {
+			float: left;
+			padding-left: 10px;
+			/*display:hidden;*/
+		}
+			#thirdalternatefour {
+			float: left;
+			padding-left: 10px;
+			/*display:hidden;*/
+		}
+		
+		html {
+    height: 110%;
+    margin-bottom: 0.01em;
+   /* overflow-y: hidden;*/
+}
+#sadude {
+	
+    display:table-cell;
+    /*visibility: hidden;*/
+    vertical-align: top;
+	font-size: 18px;
+	width: 300px;
+	word-wrap:break-word;
+	display: inline-block;
+	font-color: black;
+	background-color:white;
+	/*border-bottom: 15px solid black;*/
+	font-family: "Gill Sans", "Gill Sans MT", Calibri, sans-serif; font-style: normal; font-variant: normal; 
+	
+	padding-left: 12px;
+	padding-right: 12px;
+	
+}
+
+
+#alternatesadude{
+display:table-cell;
+    /*visibility: hidden;*/
+    vertical-align: top;
+	font-size: 18px;
+	width: 300px;
+	word-wrap:break-word;
+	display: inline-block;
+	font-color: black;
+	background-color:white;
+	/*border-bottom: 15px solid black;*/
+	font-family: "Gill Sans", "Gill Sans MT", Calibri, sans-serif; font-style: normal; font-variant: normal; 
+	
+	padding-left: 12px;
+	padding-right: 12px;
+	
+}
+
+		#tandem{
+			
+			background-color: transparent;
+			table-layout:fixed;
+			 float:left;
+
+		}
+p {
+	 font-family: "Gill Sans", "Gill Sans MT", Calibri, sans-serif; font-style: normal; font-variant: normal; font-size: 17px; color: black;
+}
+#twitter {
+	width: 100%;
+	height: 20px;
+	background-color: rgba(0, 0, 0, 0);
+	 
+}
+
+img {
+    width: 300px;
+}
+
+							</style>
+</body>
+</html>
